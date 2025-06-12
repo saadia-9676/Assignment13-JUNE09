@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding-top: 50px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 600px; 
+        }
+
+        #datetimeDisplay {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #d0d0d0;
+        }
+
+        button:active {
+            background-color: #c0c0c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p id="datetimeDisplay">Loading Date and Time...</p>
+        <button id="clickMeButton">Click me</button>
+        <button id="stopButton">stop</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const datetimeDisplay = document.getElementById('datetimeDisplay');
+            const clickMeButton = document.getElementById('clickMeButton');
+            const stopButton = document.getElementById('stopButton');
+            let intervalId; 
+
+            function updateDateTime() {
+                const now = new Date();
+                const options = {
+                    weekday: 'short',    
+                    month: 'short',      
+                    day: '2-digit',      
+                    year: 'numeric',     
+                    hour: '2-digit',     
+                    minute: '2-digit',   
+                    second: '2-digit',   
+                    hour12: false,       
+                    timeZoneName: 'shortOffset' 
+                };
+
+                let formattedDate = now.toLocaleString('en-US', options);
+                if (formattedDate.includes("GMT+0530") && !formattedDate.includes("(India Standard Time)")) {
+                    formattedDate += " (India Standard Time)";
+                } else if (!formattedDate.includes("GMT+0530")) {
+                    const offsetMinutes = now.getTimezoneOffset(); 
+                    const offsetHours = Math.abs(offsetMinutes / 60);
+                    const offsetSign = offsetMinutes > 0 ? '-' : '+'; 
+                    const offsetStr = `GMT${offsetSign}${String(Math.floor(offsetHours)).padStart(2, '0')}${String(Math.abs(offsetMinutes % 60)).padStart(2, '0')}`;
+                    formattedDate = formattedDate.replace(/GMT[+-]\d{4}/, offsetStr); 
+                    if (offsetStr === "GMT+0530") { 
+                        formattedDate += " (India Standard Time)";
+                    }
+                }
+
+                datetimeDisplay.textContent = formattedDate;
+            }
+
+            updateDateTime();
+            clickMeButton.addEventListener('click', function() {
+                if (!intervalId) {
+                    intervalId = setInterval(updateDateTime, 1000);
+                    console.log("Time update started.");
+                    clickMeButton.disabled = true;
+                    stopButton.disabled = false;
+                }
+            });
+
+            stopButton.addEventListener('click', function() {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null; 
+                    console.log("Time update stopped.");
+                    clickMeButton.disabled = false;
+                    stopButton.disabled = true;
+                }
+            });
+            stopButton.disabled = true;
+        });
+    </script>
+</body>
+</html>
